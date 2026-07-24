@@ -53,17 +53,25 @@ class HandDetector:
 
     def get_raised_fingers(self, frame, results):
 
-        fingers = []
+
+        fingers = [] # This holds the list of booleans in this order [Thumb, Index, Middle, Ring, Pinky]
 
         if results.multi_hand_landmarks:
             hand = results.multi_hand_landmarks[0]
 
-            h, w, c = frame.shape
+            h, w, c = frame.shape # Height, width, and channels of the frame
 
-            #DA WRIST
+            #THE WRIST
             wrist = (hand.landmark[0].x, hand.landmark[0].y)
 
-            #pinky and knuckle base (the reason why its here its because we need this also for the thumb
+           
+            """
+            For the thumb, since it goes across the palm, we need to compare the distance from the thumb tip 
+            to the pinky knuckle with the distance from the index knuckle to the pinky knuckle. If the thumb 
+            tip is further away than the distance between the index and pinky knuckles, then we can say that the thumb is raised.
+            (This is also why I already defined the index and pink knuckles, since we need them for the thumb check)
+
+            """
             index_knuckle = (hand.landmark[6].x, hand.landmark[6].y)
             pinky_knuckle = (hand.landmark[18].x, hand.landmark[18].y) 
 
@@ -79,6 +87,11 @@ class HandDetector:
             else:
                 fingers.append(False)
 
+            """
+            The rest of the fingers, will be checked by comparing the distance from the tip of the finger 
+            to the wrist with the distance from the knuckle of the finger to the wrist.
+            """
+            
             #INDEX FINGER
             index_tip = (hand.landmark[8].x, hand.landmark[8].y)
        
@@ -130,10 +143,12 @@ class HandDetector:
                 fingers.append(False)
 
 
-        return fingers    
+        return fingers #we finally return the list of booleans, which will be used to determine the sign being made by the hand
 
 
     def get_sign_label(self, fingers):
+        #where the sign languages (albeit for now only static ones) are defined, based on the list of booleans that is returned by the get_raised_fingers function
+
         if not fingers:
             return "No hand detected" 
         # the list look like this [Thumb, Index, Middle, Ring, Pinky]
@@ -153,9 +168,12 @@ class HandDetector:
             return "Unknown sign"
 
     def get_stable_sign_label(self, fingers):
+        """ This is the buffer method that will help to stabilize the sign detection 
+        by keeping a history of the last few detected signs and returning the most common one."""
+
         raw_sign = self.get_sign_label(fingers)
 
-        self.prediction_history.append(raw_sign)
+        self.prediction_history.append(raw_sign) # self.prediction_history is a deque that stores the last 15 (defined in the __init__ method) detected signs
 
         return statistics.mode(self.prediction_history)  # Return the most common sign in the history
     
