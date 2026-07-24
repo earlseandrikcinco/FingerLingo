@@ -1,6 +1,13 @@
 import cv2
 import mediapipe as mp
 
+#used for better accuracy in detecting the hand and its landmarks
+import math 
+
+#for buffer purposes
+from collections import deque
+import statistics
+
 
 class HandDetector:
 
@@ -16,6 +23,8 @@ class HandDetector:
         )
 
         self.drawer = mp.solutions.drawing_utils
+
+        self.prediction_history = deque(maxlen=15)  # Store the last 15 predictions for smoothing
 
     def detect(self, frame):
 
@@ -51,48 +60,71 @@ class HandDetector:
 
             h, w, c = frame.shape
 
-            #THUMB
-            thumb_tip_x = hand.landmark[4].x * w
-            thumb_knuckle_x = hand.landmark[2].x * w
+            #DA WRIST
+            wrist = (hand.landmark[0].x, hand.landmark[0].y)
 
-            if thumb_tip_x > thumb_knuckle_x:
+            #pinky and knuckle base (the reason why its here its because we need this also for the thumb
+            index_knuckle = (hand.landmark[6].x, hand.landmark[6].y)
+            pinky_knuckle = (hand.landmark[18].x, hand.landmark[18].y) 
+
+            #THUMB
+            thumb_tip = (hand.landmark[4].x, hand.landmark[4].y)
+
+            thumb_to_pinky_dist = math.dist(thumb_tip, pinky_knuckle)
+
+            palm_width_dist = math.dist(index_knuckle, pinky_knuckle)
+
+            if thumb_to_pinky_dist > palm_width_dist:
                 fingers.append(True)
             else:
                 fingers.append(False)
 
             #INDEX FINGER
-            index_tip_y = hand.landmark[8].y * h
-            index_knuckle_y = hand.landmark[6].y * h
+            index_tip = (hand.landmark[8].x, hand.landmark[8].y)
+       
 
-            if index_tip_y < index_knuckle_y:
+            index_tip_dist = math.dist(wrist, index_tip)
+            index_knuckle_dist = math.dist(wrist, index_knuckle)
+
+
+            if index_tip_dist > index_knuckle_dist:
                 fingers.append(True)
             else:
                 fingers.append(False)
 
             #MIDDLE FINGER
-            middle_tip_y = hand.landmark[12].y * h
-            middle_knuckle_y = hand.landmark[10].y * h
+            middle_tip = (hand.landmark[12].x, hand.landmark[12].y)
+            middle_knuckle = (hand.landmark[10].x, hand.landmark[10].y)
 
-            if middle_tip_y < middle_knuckle_y:
+            middle_tip_dist = math.dist(wrist, middle_tip)
+            middle_knuckle_dist = math.dist(wrist, middle_knuckle)
+
+            if middle_tip_dist > middle_knuckle_dist:
                 fingers.append(True)
             else:
                 fingers.append(False)
 
 
             #RING FINGER
-            ring_tip_y = hand.landmark[16].y * h
-            ring_knuckle_y = hand.landmark[14].y * h
+            ring_tip = (hand.landmark[16].x, hand.landmark[16].y)
+            ring_knuckle = (hand.landmark[14].x, hand.landmark[14].y)
 
-            if ring_tip_y < ring_knuckle_y:
+            ring_tip_dist = math.dist(wrist, ring_tip)
+            ring_knuckle_dist = math.dist(wrist, ring_knuckle)
+
+            if ring_tip_dist > ring_knuckle_dist:
                 fingers.append(True)
             else:
                 fingers.append(False)    
 
             #PINKY FINGER
-            pinky_tip_y = hand.landmark[20].y * h
-            pinky_knuckle_y = hand.landmark[18].y * h
+            pinky_tip = (hand.landmark[20].x, hand.landmark[20].y)
+            
 
-            if pinky_tip_y < pinky_knuckle_y:
+            pinky_tip_dist = math.dist(wrist, pinky_tip)
+            pinky_knuckle_dist = math.dist(wrist, pinky_knuckle)
+
+            if pinky_tip_dist > pinky_knuckle_dist:
                 fingers.append(True)
             else:
                 fingers.append(False)
@@ -111,12 +143,19 @@ class HandDetector:
             return "Peace Sign"
         elif fingers == [True, True, False, False, False]:
             return "Letter L"
-        elif fingers == [False, False, True, False, False]:
-            return "Fuck You"
+        elif fingers == [True, False, False, False, False]:
+            return "Thumbs Up"
         elif fingers == [False, False, False, False, False]:
             return "Closed Hand"
         elif fingers == [True, True, True, True, True]:
             return "Open Hand"
         else:
             return "Unknown sign"
-        
+
+    def get_stable_sign_label(self, fingers):
+        raw_sign = self.get_sign_label(fingers)
+
+        self.prediction_history.append(raw_sign)
+
+        return statistics.mode(self.prediction_history)  # Return the most common sign in the history
+    

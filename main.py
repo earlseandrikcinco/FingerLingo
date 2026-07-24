@@ -20,7 +20,7 @@ while True:
 
     fingers =  detector.get_raised_fingers(frame, results)
 
-    sign = detector.get_sign_label(fingers)
+    sign = detector.get_stable_sign_label(fingers)
     cv2.putText(frame, sign, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
 
