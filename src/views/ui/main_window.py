@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from src.utils import config
+from utils import config
 from .home_screen import HomeScreen
 from .selection_screen import SelectionScreen
 from .learning_screen import LearningScreen

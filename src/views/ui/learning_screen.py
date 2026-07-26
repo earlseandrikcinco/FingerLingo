@@ -2,9 +2,9 @@ import customtkinter as ctk
 import cv2
 from PIL import Image
 from .base_screen import BaseScreen
-from src.utils import config
-from src.models.camera import Camera
-from src.models.hand_detector import HandDetector
+from utils import config
+from models.camera import Camera
+from models.hand_detector import HandDetector
 
 
 # Seen after selection_screen
@@ -18,29 +18,47 @@ class LearningScreen(BaseScreen):
         self.camera = Camera()
         self.detector = HandDetector()
 
+        self.glass_card = ctk.CTkFrame(
+            self,
+            fg_color=config.GLASS_BG,
+            border_color=config.GLASS_BORDER,
+            border_width=2,
+            corner_radius=24,
+            width=630,
+            height=580
+        )
+        self.glass_card.place(relx=0.5, rely=0.5, anchor="center")
+        self.glass_card.pack_propagate(False)
+
         # Build the UI
         self.title = ctk.CTkLabel(
-            self, text=f"Lesson: {self.lesson_name}",
+            self.glass_card, text=f"Lesson: {self.lesson_name}",
             font=self.title_font, text_color=config.TEXT_COLOR
         )
-        self.title.pack(pady=(20, 5))
+        self.title.pack(pady=(25, 2))
 
         self.sign_label = ctk.CTkLabel(
-            self, text="Show a sign...",
+            self.glass_card, text="Show a sign...",
             font=self.button_font, text_color=config.SUBTEXT_COLOR
         )
-        self.sign_label.pack(pady=(0, 10))
+        self.sign_label.pack(pady=(0, 15))
 
-        # This label will hold the video frames
-        self.video_label = ctk.CTkLabel(self, text="")
-        self.video_label.pack(expand=True)
+        #removed "expand=true" so it doesn't push other elements (like the end lessio)
+        self.video_label = ctk.CTkLabel(self.glass_card, text="")
+        self.video_label.pack(pady=5)
+
 
         self.back_btn = ctk.CTkButton(
-            self, text="End Lesson", font=self.button_font,
-            fg_color=config.BTN_BG, hover_color=config.BTN_HOVER,
+            self.glass_card, text="End Lesson", font=self.button_font,
+            fg_color=config.BTN_BG, text_color=config.TEXT_COLOR,
+            hover_color=config.BTN_HOVER, border_width=2,
+            border_color=config.BTN_BORDER, corner_radius=25,
+            width=200, height=42,
             command=self._clean_and_go_back
         )
-        self.back_btn.pack(pady=20)
+        self.back_btn.pack(pady=15, padx=20)
+
+        self.winfo_toplevel().bind("<Escape>", lambda event: self._clean_and_go_back()) #escape button also exits the lesson
 
         # Start the video loop
         self.loop_id = None
@@ -66,10 +84,12 @@ class LearningScreen(BaseScreen):
 
             # Convert array to PIL Image, then to CTkImage
             pil_image = Image.fromarray(rgb_frame)
+
+
             ctk_image = ctk.CTkImage(
                 light_image=pil_image,
                 dark_image=pil_image,
-                size=(640, 480)  # Lock the video size
+                size=(400, 300)  # Lock the video size
             )
 
             # put the new image onto the label

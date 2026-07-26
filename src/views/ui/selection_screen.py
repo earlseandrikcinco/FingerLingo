@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from .base_screen import BaseScreen
-from src.utils import config
+from utils import config
 
 
 # Seen after "Let's Learn" button from home_screen

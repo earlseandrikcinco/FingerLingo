@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from src.utils import config
+from utils import config
 
 
 # Super class for the whole UI

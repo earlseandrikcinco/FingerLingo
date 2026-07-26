@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from .base_screen import BaseScreen
-from src.utils import config
+from utils import config
 
 
 # Seen upon start of the app
@@ -15,7 +15,7 @@ class HomeScreen(BaseScreen):
             border_width=2, 
             corner_radius=24, 
             width=550, 
-            height=380
+            height=500
         )
         self.glass_card.place(relx=0.5, rely=0.5, anchor="center")
         self.glass_card.pack_propagate(False)
