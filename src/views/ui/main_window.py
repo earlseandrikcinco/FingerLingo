@@ -42,7 +42,9 @@ class FingerLingoApp(ctk.CTk):
             self.current_screen.destroy()
 
         self.current_screen = LearningScreen(
-            parent=self
+            parent=self,
+            lesson_name=lesson_name,
+            on_back_click=self.show_selection_screen
         )
         self.current_screen.pack(fill="both", expand=True)
 
