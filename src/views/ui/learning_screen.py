@@ -103,14 +103,26 @@ class LearningScreen(BaseScreen):
         )
         self.target_label.pack(pady=(10, 5))
 
-        self.video_label = ctk.CTkLabel(self.camera_frame, text="")
-        self.video_label.pack(pady=5)
+        #this row is for the reference image next to the live camera
+        self.detect_row = ctk.CTkFrame(self.camera_frame, fg_color="transparent")
+        self.detect_row.pack(pady=5)
+
+        self.reference_image_label = ctk.CTkLabel(self.detect_row, text = "")
+        self.reference_image_label.pack(side="left", padx=(0,15))
+
+        self.video_label = ctk.CTkLabel(self.detect_row, text="")
+        self.video_label.pack(side="left")
 
         self.sign_label = ctk.CTkLabel(
             self.camera_frame, text="Show a sign...", font=self.subtitle_font,
             text_color=config.SUBTEXT_COLOR
         )
         self.sign_label.pack(pady=(5, 10))
+
+    def _get_image_path(self, filename):
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__)) #src/views/ui
+        ASSETS_DIR = os.path.join(BASE_DIR, "..", "..", "assets", "lesson_images")
+        return os.path.join(ASSETS_DIR, filename)
 
  #  state transitions 
 
@@ -127,10 +139,8 @@ class LearningScreen(BaseScreen):
         self.preview_letter_label.configure(text=f"Letter {letter}")
         self.preview_instruction_label.configure(text=f"Get ready to sign the letter {letter}")
 
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__)) #src/views/ui
-        ASSETS_DIR = os.path.join(BASE_DIR, "..", "..", "assets", "lesson_images") #from views/ui, we go to assets/lesson_images    
 
-        image_path = os.path.join(ASSETS_DIR, letter_data.get("image", ""))
+        image_path = self._get_image_path(letter_data.get("image", ""))
         if letter_data.get("image") and os.path.exists(image_path):
             pil_image = Image.open(image_path)
             ctk_image = ctk.CTkImage(light_image=pil_image, dark_image=pil_image, size=(220, 220))
@@ -146,14 +156,23 @@ class LearningScreen(BaseScreen):
         self.preview_frame.pack_forget()
         self.camera_frame.pack(expand=True, fill="both")
 
-        letter = self.letters[self.current_index]["letter"]
+        letter_data = self.letters[self.current_index]
+        letter = letter_data["letter"]
         self.target_label.configure(text=f"Show: {letter}")
+
+        image_path = self._get_image_path(letter_data.get("image", ""))
+        if letter_data.get("image") and os.path.exists(image_path):
+            pil_image = Image.open(image_path)
+            ctk_image = ctk.CTkImage(light_image=pil_image, dark_image=pil_image, size=(150, 150))
+            self.reference_image_label.configure(image=ctk_image, text="")
+        else:
+            self.reference_image_label.configure(image=None, text=letter, font=self.title_font)    
 
         self._update_frame()
 
     def _update_frame(self):
         if self.state != "detecting":
-            return  # stops the loop; preview/success states don't reschedule
+            return  # stops the loop and preview/success states don't reschedule
 
         frame = self.camera.get_frame()
 
@@ -185,7 +204,7 @@ class LearningScreen(BaseScreen):
     def _on_correct_sign(self):
         self.state = "success"
         letter = self.letters[self.current_index]["letter"]
-        self.sign_label.configure(text=f"Correct!  That's {letter}", text_color="#4CAF50")
+        self.sign_label.configure(text=f"Correct! That's {letter}", text_color="#4CAF50")
         self.after(1200, self._advance_to_next)
 
     def _advance_to_next(self):
