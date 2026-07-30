@@ -1,8 +1,8 @@
 customtkinter==6.0.0
 darkdetect==0.8.0
-mediapipe~=0.10.21
+mediapipe==0.10.9
 numpy~=1.26.4
-opencv-python~=4.12.0.88
+opencv-python==4.10.0.84
 packaging==26.2
 pillow==12.3.0
 pandas~=2.2.3

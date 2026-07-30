@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -6,7 +7,7 @@ from sklearn.metrics import classification_report, accuracy_score
 import joblib
 
 
-def train_model(csv_path):
+def train_model(csv_path, output_dir):
     print("1. Loading dataset...")
     df = pd.read_csv(csv_path)
 
@@ -36,15 +37,30 @@ def train_model(csv_path):
     accuracy = accuracy_score(y_test, y_pred)
     print(f"\n🎉 Test Set Accuracy: {accuracy * 100:.2f}%\n")
 
-    # Detailed report showing precision/recall per sign
     print("Classification Report:")
-    print(classification_report(y_test, y_pred, target_names=label_encoder.classes_))
+    print(
+        classification_report(
+            y_test, 
+            y_pred, 
+            labels=range(len(label_encoder.classes_)), 
+            target_names=label_encoder.classes_
+        )
+    )
 
-    # 7. Save model and label encoder for live webcam inference
-    joblib.dump(model, 'asl_model.pkl')
-    joblib.dump(label_encoder, 'label_encoder.pkl')
-    print("✅ Model saved to 'asl_model.pkl'")
-    print("✅ Label Encoder saved to 'label_encoder.pkl'")
+    # 7. Save model and label encoder to saved_models/
+    os.makedirs(output_dir, exist_ok=True)
+    model_path = os.path.join(output_dir, 'asl_model.pkl')
+    encoder_path = os.path.join(output_dir, 'label_encoder.pkl')
+
+    joblib.dump(model, model_path)
+    joblib.dump(label_encoder, encoder_path)
+    print(f"✅ Model saved to '{model_path}'")
+    print(f"✅ Label Encoder saved to '{encoder_path}'")
+
 
 if __name__ == "__main__":
-    train_model("extracted_asl_data.csv")
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_file_path = os.path.join(script_dir, "..", "data", "extracted_real_asl_data.csv")
+    output_directory = os.path.join(script_dir, "..", "saved_models")
+
+    train_model(csv_file_path, output_directory)

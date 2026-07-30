@@ -1,6 +1,14 @@
 .venv/
 
---pycache__/
-
 .vscode/
 .DS_Store
+
+# Model binaries and large dataset files
+*.pkl
+*.csv
+src/models/saved_models/*.pkl
+src/models/data/*.csv
+
+# Byte-compiled / Python cache
+__pycache__/
+*.pyc
