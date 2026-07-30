@@ -5,9 +5,13 @@ import csv
 
 
 def extract_dataset(dataset_path, output_csv):
-    # 1. Initialize MediaPipe
+    # 1. Initialize MediaPipe (Standard confidence for real photos)
     mp_hands = mp.solutions.hands
-    hands = mp_hands.Hands(static_image_mode=True, max_num_hands=1)
+    hands = mp_hands.Hands(
+        static_image_mode=True,
+        max_num_hands=1,
+        min_detection_confidence=0.5
+    )
 
     # 2. Set up the CSV file and headers
     with open(output_csv, mode='w', newline='') as f:
@@ -19,7 +23,7 @@ def extract_dataset(dataset_path, output_csv):
 
         success_count = 0
         fail_count = 0
-        total_processed = 0  # Track total images looked at
+        total_processed = 0
 
         # 3. Loop through every folder
         for folder_name in sorted(os.listdir(dataset_path)):
@@ -38,22 +42,20 @@ def extract_dataset(dataset_path, output_csv):
                 total_processed += 1
                 image_path = os.path.join(folder_path, image_name)
 
-                # SAFETY NET: Try-except block for corrupted files
                 try:
                     image = cv2.imread(image_path)
 
                     if image is None:
                         continue
 
-                    # Convert to RGB for MediaPipe
+                    # Convert to RGB for MediaPipe (No padding needed for real photos!)
                     rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                     results = hands.process(rgb_image)
 
-                    # 5. If a hand is found, normalize and save!
+                    # 5. If a hand is found, normalize and save
                     if results.multi_hand_landmarks:
                         hand_landmarks = results.multi_hand_landmarks[0]
 
-                        # Grab wrist coordinates for normalization
                         wrist_x = hand_landmarks.landmark[0].x
                         wrist_y = hand_landmarks.landmark[0].y
 
@@ -63,7 +65,7 @@ def extract_dataset(dataset_path, output_csv):
                             ny = landmark.y - wrist_y
                             normalized_landmarks.extend([nx, ny])
 
-                        # Save the folder name as the label
+                        # Save the folder name as the label ('A', 'DEL', 'SPACE')
                         writer.writerow([folder_name.upper()] + normalized_landmarks)
                         success_count += 1
                     else:
@@ -74,24 +76,22 @@ def extract_dataset(dataset_path, output_csv):
                     fail_count += 1
                     continue
 
-                # PROGRESS TRACKER & DATA SAVER
-                # Every 1,000 images, print an update and force-save the CSV to disk
-                if total_processed % 1000 == 0:
+                # Print progress every 5,000 images to avoid terminal spam
+                if total_processed % 5000 == 0:
                     print(f"    ...Processed {total_processed} images so far. (Found hands in {success_count})")
                     f.flush()
 
     print("-" * 30)
     print("Extraction Complete!")
     print(f"✅ Successfully extracted landmarks from {success_count} images.")
-    print(f"❌ Failed to find hands in {fail_count} images.")
+    print(f"❌ Failed to find hands in {fail_count} images. (Expect many failures from the 'nothing' folder)")
 
-    # Clean up
     hands.close()
 
 
 if __name__ == "__main__":
-    # CHANGE THIS to the path where your dataset folders are!
-    DATASET_DIRECTORY = "src/models/processed_combine_asl_dataset"
-    OUTPUT_FILE = "extracted_asl_data.csv"
+    # UPDATE THIS to your new ASL Alphabet train directory
+    DATASET_DIRECTORY = "asl_alphabet_train"
+    OUTPUT_FILE = "extracted_real_asl_data.csv"
 
     extract_dataset(DATASET_DIRECTORY, OUTPUT_FILE)
