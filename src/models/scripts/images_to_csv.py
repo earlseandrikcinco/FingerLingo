@@ -102,7 +102,11 @@ def process_image(image_path, label, hands, writer, success_count, fail_count, t
 
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    DATASET_DIRECTORY = os.path.join(script_dir, "..", "data", "asl_alphabet_test")
-    OUTPUT_FILE = os.path.join(script_dir, "..", "data", "test_asl_data.csv")
+    
+    # Point to the folder where your 0-9 subfolders live
+    DATASET_DIRECTORY = os.path.join(script_dir, "..", "data", "asl_numbers")
+    
+    # Save extracted landmarks to a separate temporary CSV
+    OUTPUT_FILE = os.path.join(script_dir, "..", "data", "extracted_kaggle_numbers.csv")
 
     extract_dataset(DATASET_DIRECTORY, OUTPUT_FILE)
