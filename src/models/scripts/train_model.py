@@ -35,7 +35,7 @@ def train_model(csv_path, output_dir):
     print("5. Evaluating performance...")
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
-    print(f"\n🎉 Test Set Accuracy: {accuracy * 100:.2f}%\n")
+    print(f"\nTest Set Accuracy: {accuracy * 100:.2f}%\n")
 
     print("Classification Report:")
     print(
@@ -54,8 +54,8 @@ def train_model(csv_path, output_dir):
 
     joblib.dump(model, model_path)
     joblib.dump(label_encoder, encoder_path)
-    print(f"✅ Model saved to '{model_path}'")
-    print(f"✅ Label Encoder saved to '{encoder_path}'")
+    print(f"Model saved to '{model_path}'")
+    print(f"Label Encoder saved to '{encoder_path}'")
 
 
 if __name__ == "__main__":
