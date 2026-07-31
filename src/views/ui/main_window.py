@@ -2,7 +2,7 @@ import customtkinter as ctk
 from utils import config
 from .home_screen import HomeScreen
 from .selection_screen import SelectionScreen
-from .learning_screen import LearningScreen
+from .lesson_screen import LearningScreen
 
 
 # App controller
