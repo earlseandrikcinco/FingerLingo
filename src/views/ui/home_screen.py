@@ -5,7 +5,7 @@ from utils import config
 
 # Seen upon start of the app
 class HomeScreen(BaseScreen): 
-    def __init__(self, parent, on_start_click):
+    def __init__(self, parent, on_start_click, on_quiz_click):
         super().__init__(parent) 
 
         self.glass_card = ctk.CTkFrame(
@@ -40,3 +40,11 @@ class HomeScreen(BaseScreen):
             width=240, height=50, command=on_start_click 
         )
         self.start_button.pack(pady=10)
+
+        self.quiz_button = ctk.CTkButton(
+            self.glass_card, text="Quiz", font=self.button_font,
+            fg_color=config.BTN_BG, border_color=config.BTN_BORDER, 
+            border_width=2, hover_color=config.BTN_HOVER, corner_radius=25,
+            width=240, height=50, command=on_quiz_click
+        )
+        self.quiz_button.pack(pady=10)

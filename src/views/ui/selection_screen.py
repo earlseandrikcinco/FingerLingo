@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from .base_screen import BaseScreen
-from src.utils import config
+from utils import config
 
 
 # Seen after "Let's Learn" button from home_screen
@@ -35,9 +35,7 @@ class SelectionScreen(BaseScreen):
         # Define the lessons
         alphabet_lessons = ["A - E", "F - J", "K - O",
                             "P - T", "U - Z"]
-        digit_lessons = ["0 - 10", "11 - 15", "16 - 19",
-                         "20 - 29", "30 - 45", "46 - 60",
-                         "61 - 75", "76 - 90", "91 - 100"]
+        digit_lessons = ["0 - 10"]
         greeting_lessons = ["Hello / Bye", "Please / Thanks", "How are you?",
                             "Yes / No"]
 
@@ -54,7 +52,7 @@ class SelectionScreen(BaseScreen):
         )
         self.back_btn.pack(pady=(15, 0))
 
-    # --- HELPER FUNCTION ---
+    # HELPER FUNCTION 
 
     def _build_tab_grid(self, tab_name, lessons_array):
         tab = self.tab_view.tab(tab_name)
@@ -63,7 +61,7 @@ class SelectionScreen(BaseScreen):
         grid_container = ctk.CTkFrame(tab, fg_color="transparent")
         grid_container.pack(expand=True, fill="both", padx=10, pady=10)
 
-        # --- CENTER THE GRID COLUMNS ---
+        # CENTER THE GRID COLUMNS
         for col_idx in range(3):
             grid_container.grid_columnconfigure(col_idx, weight=1)
 

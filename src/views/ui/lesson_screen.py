@@ -3,17 +3,18 @@ import customtkinter as ctk
 import cv2
 from PIL import Image
 from .base_screen import BaseScreen
-from src.utils import config
-from src.models.camera import Camera
-from src.models.hand_detector import HandDetector
+from utils import config
+from models.camera import Camera
+from models.hand_detector import HandDetector
 
 
 class LearningScreen(BaseScreen):
-    def __init__(self, parent, lesson_name, on_back_click, progress_manager=None):
+    def __init__(self, parent, lesson_name, on_back_click, progress_manager=None, is_quiz_mode=False):
         super().__init__(parent)
         self.lesson_name = lesson_name
         self.on_back_click = on_back_click
         self.progress_manager = progress_manager
+        self.is_quiz_mode = is_quiz_mode
 
         self.letters = config.LESSONS.get(lesson_name, [])
         self.total_cards = len(self.letters)
@@ -232,36 +233,46 @@ class LearningScreen(BaseScreen):
         letter_data = self.letters[self.current_index]
         letter = letter_data["letter"]
 
-        self.preview_letter_label.configure(text=f"Letter {letter}")
-        self.preview_instruction_label.configure(text=f"Get ready to sign the letter {letter}")
-
-        # Instant load from cache
-        img_key = f"{letter_data.get('image')}_large"
-        if img_key in self.image_cache and self.image_cache[img_key]:
-            self.preview_image_label.configure(image=self.image_cache[img_key], text="")
+        if self.is_quiz_mode:
+            self.preview_letter_label.configure(text=f"Quiz Sign: {letter}")
+            self.preview_instruction_label.configure(text="Test your memory! Perform the sign without hints.")
+            self.preview_image_label.configure(image=None, text="?", font=("Arial", 64))
         else:
-            self.preview_image_label.configure(image=None, text=letter, font=self.title_font)
+            self.preview_letter_label.configure(text=f"Letter {letter}")
+            self.preview_instruction_label.configure(text=f"Get ready to sign the letter {letter}")
+
+            img_key = f"{letter_data.get('image')}_large"
+            if img_key in self.image_cache and self.image_cache[img_key]:
+                self.preview_image_label.configure(image=self.image_cache[img_key], text="")
+            else:
+                self.preview_image_label.configure(image=None, text=letter, font=self.title_font)
 
     def _start_detecting(self):
-        self.state = "detecting"
-        self.match_streak = 0
-        self.hold_progress.set(0.0)
+            self.state = "detecting"
+            self.match_streak = 0
+            self.hold_progress.set(0.0)
 
-        self._hide_all_frames()
-        self.camera_frame.pack(expand=True, fill="both")
+            self._hide_all_frames()
+            self.camera_frame.pack(expand=True, fill="both")
 
-        letter_data = self.letters[self.current_index]
-        letter = letter_data["letter"]
-        self.target_label.configure(text=f"Show: {letter}")
+            letter_data = self.letters[self.current_index]
+            letter = letter_data["letter"]
 
-        # Instant load from cache
-        img_key = f"{letter_data.get('image')}_small"
-        if img_key in self.image_cache and self.image_cache[img_key]:
-            self.reference_image_label.configure(image=self.image_cache[img_key], text="")
-        else:
-            self.reference_image_label.configure(image=None, text=letter, font=self.title_font)
+            # QUIZ MODE ADJUSTMENTS
+            if self.is_quiz_mode:
+                self.target_label.configure(text=f"Quiz Target: {letter}")
+                self.reference_image_label.pack_forget()  # Completely hides the widget frame
+            else:
+                self.target_label.configure(text=f"Show: {letter}")
+                self.reference_image_label.pack(side="left", padx=(0, 15)) # Shows it if not in quiz mode
+                
+                img_key = f"{letter_data.get('image')}_small"
+                if img_key in self.image_cache and self.image_cache[img_key]:
+                    self.reference_image_label.configure(image=self.image_cache[img_key], text="")
+                else:
+                    self.reference_image_label.configure(image=None, text=letter, font=self.title_font)
 
-        self._update_frame()
+            self._update_frame()
 
     def _update_frame(self):
         if self.state != "detecting":
