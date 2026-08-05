@@ -1,13 +1,12 @@
 import cv2
 import os
 import sys
+from src.models.hand_detector import HandDetector
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 models_dir = os.path.abspath(os.path.join(script_dir, ".."))
 if models_dir not in sys.path:
     sys.path.append(models_dir)
-
-from hand_detector import HandDetector
 
 
 def main():

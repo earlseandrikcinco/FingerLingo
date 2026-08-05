@@ -1,0 +1,117 @@
+{
+  "Alphabet": {
+    "A - E": [
+      { "letter": "A", "image": "a.png", "is_dynamic": false },
+      { "letter": "B", "image": "b.png", "is_dynamic": false },
+      { "letter": "C", "image": "c.png", "is_dynamic": false },
+      { "letter": "D", "image": "d.png", "is_dynamic": false },
+      { "letter": "E", "image": "e.png", "is_dynamic": false }
+    ],
+    "F - J": [
+      { "letter": "F", "image": "f.png", "is_dynamic": false },
+      { "letter": "G", "image": "g.png", "is_dynamic": false },
+      { "letter": "H", "image": "h.png", "is_dynamic": false },
+      { "letter": "I", "image": "i.png", "is_dynamic": false },
+      { "letter": "J", "image": "j.png", "is_dynamic": true }
+    ],
+    "K - O": [
+      { "letter": "K", "image": "k.png", "is_dynamic": false },
+      { "letter": "L", "image": "l.png", "is_dynamic": false },
+      { "letter": "M", "image": "m.png", "is_dynamic": false },
+      { "letter": "N", "image": "n.png", "is_dynamic": false },
+      { "letter": "O", "image": "o.png", "is_dynamic": false }
+    ],
+    "P - T": [
+      { "letter": "P", "image": "p.png", "is_dynamic": false },
+      { "letter": "Q", "image": "q.png", "is_dynamic": false },
+      { "letter": "R", "image": "r.png", "is_dynamic": false },
+      { "letter": "S", "image": "s.png", "is_dynamic": false },
+      { "letter": "T", "image": "t.png", "is_dynamic": false }
+    ],
+    "U - Z": [
+      { "letter": "U", "image": "u.png", "is_dynamic": false },
+      { "letter": "V", "image": "v.png", "is_dynamic": false },
+      { "letter": "W", "image": "w.png", "is_dynamic": false },
+      { "letter": "X", "image": "x.png", "is_dynamic": false },
+      { "letter": "Y", "image": "y.png", "is_dynamic": false },
+      { "letter": "Z", "image": "z.png", "is_dynamic": true }
+    ]
+  },
+  "Numbers": {
+    "0 - 10": [
+      { "letter": "0", "image": "0.png", "is_dynamic": false },
+      { "letter": "1", "image": "1.png", "is_dynamic": false },
+      { "letter": "2", "image": "2.png", "is_dynamic": false },
+      { "letter": "3", "image": "3.png", "is_dynamic": false },
+      { "letter": "4", "image": "4.png", "is_dynamic": false },
+      { "letter": "5", "image": "5.png", "is_dynamic": false },
+      { "letter": "6", "image": "6.png", "is_dynamic": false },
+      { "letter": "7", "image": "7.png", "is_dynamic": false },
+      { "letter": "8", "image": "8.png", "is_dynamic": false },
+      { "letter": "9", "image": "9.png", "is_dynamic": false },
+      { "letter": "10", "image": "10.png", "is_dynamic": true }
+    ]
+  },
+  "Words": {
+    "Greetings (1-10)": [
+      { "letter": "Hello", "image": "hello.png", "is_dynamic": true },
+      { "letter": "Goodbye", "image": "goodbye.png", "is_dynamic": true },
+      { "letter": "Yes", "image": "yes.png", "is_dynamic": true },
+      { "letter": "No", "image": "no.png", "is_dynamic": true },
+      { "letter": "Please", "image": "please.png", "is_dynamic": true },
+      { "letter": "Thank You", "image": "thank_you.png", "is_dynamic": true },
+      { "letter": "Sorry", "image": "sorry.png", "is_dynamic": true },
+      { "letter": "How", "image": "how.png", "is_dynamic": true },
+      { "letter": "You", "image": "you.png", "is_dynamic": false },
+      { "letter": "Me", "image": "me.png", "is_dynamic": false }
+    ],
+    "Needs & Wants (11-20)": [
+      { "letter": "Want", "image": "want.png", "is_dynamic": true },
+      { "letter": "Need", "image": "need.png", "is_dynamic": true },
+      { "letter": "Help", "image": "help.png", "is_dynamic": true },
+      { "letter": "More", "image": "more.png", "is_dynamic": true },
+      { "letter": "Finished", "image": "finished.png", "is_dynamic": true },
+      { "letter": "Eat", "image": "eat.png", "is_dynamic": true },
+      { "letter": "Drink", "image": "drink.png", "is_dynamic": true },
+      { "letter": "Water", "image": "water.png", "is_dynamic": true },
+      { "letter": "Stop", "image": "stop.png", "is_dynamic": true },
+      { "letter": "Go", "image": "go.png", "is_dynamic": true }
+    ],
+    "People (21-30)": [
+      { "letter": "Mother", "image": "mother.png", "is_dynamic": true },
+      { "letter": "Father", "image": "father.png", "is_dynamic": true },
+      { "letter": "Boy", "image": "boy.png", "is_dynamic": true },
+      { "letter": "Girl", "image": "girl.png", "is_dynamic": true },
+      { "letter": "Friend", "image": "friend.png", "is_dynamic": true },
+      { "letter": "Family", "image": "family.png", "is_dynamic": true },
+      { "letter": "Baby", "image": "baby.png", "is_dynamic": true },
+      { "letter": "Name", "image": "name.png", "is_dynamic": true },
+      { "letter": "Man", "image": "man.png", "is_dynamic": true },
+      { "letter": "Woman", "image": "woman.png", "is_dynamic": true }
+    ],
+    "Questions (31-40)": [
+      { "letter": "Who", "image": "who.png", "is_dynamic": true },
+      { "letter": "What", "image": "what.png", "is_dynamic": true },
+      { "letter": "Where", "image": "where.png", "is_dynamic": true },
+      { "letter": "When", "image": "when.png", "is_dynamic": true },
+      { "letter": "Why", "image": "why.png", "is_dynamic": true },
+      { "letter": "Which", "image": "which.png", "is_dynamic": true },
+      { "letter": "How Many", "image": "how_many.png", "is_dynamic": true },
+      { "letter": "Can", "image": "can.png", "is_dynamic": true },
+      { "letter": "Deaf", "image": "deaf.png", "is_dynamic": true },
+      { "letter": "Hearing", "image": "hearing.png", "is_dynamic": true }
+    ],
+    "Time & Feelings (41-50)": [
+      { "letter": "Now", "image": "now.png", "is_dynamic": true },
+      { "letter": "Later", "image": "later.png", "is_dynamic": true },
+      { "letter": "Today", "image": "today.png", "is_dynamic": true },
+      { "letter": "Tomorrow", "image": "tomorrow.png", "is_dynamic": true },
+      { "letter": "Yesterday", "image": "yesterday.png", "is_dynamic": true },
+      { "letter": "Happy", "image": "happy.png", "is_dynamic": true },
+      { "letter": "Sad", "image": "sad.png", "is_dynamic": true },
+      { "letter": "Angry", "image": "angry.png", "is_dynamic": true },
+      { "letter": "Tired", "image": "tired.png", "is_dynamic": true },
+      { "letter": "Love", "image": "love.png", "is_dynamic": true }
+    ]
+  }
+}
