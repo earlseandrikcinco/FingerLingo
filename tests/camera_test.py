@@ -1,5 +1,5 @@
-from src.models.camera import Camera
-from src.models.hand_detector import HandDetector
+from models.camera import Camera
+from models.hand_detector import HandDetector
 import cv2
 
 camera = Camera()
