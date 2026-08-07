@@ -62,7 +62,7 @@ class ProgressManager:
         card["next_review"] = (now + timedelta(days=card["interval_days"])).isoformat()
 
         self.progress_data[letter] = card
-        self.save()
+        self._save_data()
 
     def mark_as_learning(self, letter):
         """
@@ -78,7 +78,7 @@ class ProgressManager:
         card["next_review"] = now.isoformat()
 
         self.progress_data[letter] = card
-        self.save()
+        self._save_data()
 
     def get_learnt_count(self, lesson_name):
         """
@@ -105,13 +105,14 @@ class ProgressManager:
         """
         due_cards = []
         now = datetime.now()
-
         for letter, data in self.progress_data.items():
-            if data["next_review"]:
-                next_review_date = datetime.fromisoformat(data["next_review"])
-                if now >= next_review_date:
-                    due_cards.append(letter)
-
+            if data.get("next_review"):
+                try:
+                    next_review_date = datetime.fromisoformat(data["next_review"])
+                    if now >= next_review_date:
+                        due_cards.append(letter)
+                except ValueError:
+                    continue
         return due_cards
 
     def save(self):
