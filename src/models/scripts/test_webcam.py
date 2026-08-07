@@ -1,13 +1,20 @@
 import cv2
-import os
 import sys
-from src.models.hand_detector import HandDetector
+import os
 
+# Get absolute path to the directory containing test_webcam.py (src/models/scripts)
 script_dir = os.path.dirname(os.path.abspath(__file__))
-models_dir = os.path.abspath(os.path.join(script_dir, ".."))
-if models_dir not in sys.path:
-    sys.path.append(models_dir)
 
+# Go UP TWO LEVELS: src/models/scripts -> src/models -> src
+src_dir = os.path.abspath(os.path.join(script_dir, "..", ".."))
+
+# Add 'src' to Python's module search path BEFORE importing 'models'
+if src_dir not in sys.path:
+    sys.path.insert(0, src_dir)
+
+# Now Python can find 'models.hand_detector'
+
+from models.hand_detector import HandDetector
 
 def main():
     detector = HandDetector()

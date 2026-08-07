@@ -1,4 +1,6 @@
 import os
+import collections
+import numpy as np
 import customtkinter as ctk
 import cv2
 from PIL import Image
@@ -25,17 +27,24 @@ class LearningScreen(BaseScreen):
         self.state = "preview"  # "preview" | "detecting" | "card_success" | "complete"
         self.loop_id = None
 
-        # --- ASSET CACHE (Load and store images in a dictionary) ---
+        # Sequence buffers for dynamic gestures (J, Z, 10)
+        self.SEQUENCE_LENGTH = 45
+        self.frame_buffer = collections.deque(maxlen=self.SEQUENCE_LENGTH)
+        self.raw_landmarks_buffer = collections.deque(maxlen=self.SEQUENCE_LENGTH)
+        self.last_valid_normalized = None
+        self.last_valid_raw = None
+
+        #ASSET CACHE (Load and store images in a dictionary)
         self.image_cache = {}
 
-        # Shared hardware instances
+        #Shared hardware instances
         self.camera = Camera()
         self.detector = HandDetector()
 
-        # Pre-cache lesson assets immediately to ensure instant UI transitions
+        #Pre-cache lesson assets immediately to ensure instant UI transitions
         self._precache_lesson_images()
 
-        # --- Main Container Card ---
+        #Main Container Card
         self.glass_card = ctk.CTkFrame(
             self, fg_color=config.GLASS_BG, border_color=config.GLASS_BORDER,
             border_width=2, corner_radius=24, width=640, height=620
@@ -43,7 +52,7 @@ class LearningScreen(BaseScreen):
         self.glass_card.place(relx=0.5, rely=0.5, anchor="center")
         self.glass_card.pack_propagate(False)
 
-        # --- Top Progress Header ---
+        #Top Progress Header
         self.header_frame = ctk.CTkFrame(self.glass_card, fg_color="transparent")
         self.header_frame.pack(fill="x", pady=(20, 0), padx=30)
 
@@ -96,7 +105,7 @@ class LearningScreen(BaseScreen):
         else:
             self._show_preview_card()
 
-    # --- Asset Path & Caching Helpers ---
+    #Asset Path & Caching Helpers
 
     def _get_asset_path(self, relative_filename):
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -126,7 +135,7 @@ class LearningScreen(BaseScreen):
             self.lesson_progress_bar.set(ratio)
             self.progress_text.configure(text=f"{self.cards_learnt}/{self.total_cards} ({percentage}%)")
 
-    # --- Widget Builders ---
+    # Widget Builders
 
     def _build_preview_widgets(self):
         self.preview_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
@@ -216,7 +225,7 @@ class LearningScreen(BaseScreen):
         )
         self.retry_btn.pack(pady=8)
 
-    # --- Screen View Transitions ---
+    #Screen View Transitions
 
     def _hide_all_frames(self):
         self.preview_frame.pack_forget()
@@ -226,12 +235,14 @@ class LearningScreen(BaseScreen):
     def _show_preview_card(self):
         self.state = "preview"
         self.match_streak = 0
+        self.frame_buffer.clear()
+        self.raw_landmarks_buffer.clear()
 
         self._hide_all_frames()
         self.preview_frame.pack(expand=True, fill="both")
 
         letter_data = self.letters[self.current_index]
-        letter = letter_data["letter"]
+        letter = str(letter_data["letter"])
 
         if self.is_quiz_mode:
             self.preview_letter_label.configure(text=f"Quiz Sign: {letter}")
@@ -239,10 +250,11 @@ class LearningScreen(BaseScreen):
             self.preview_image_label.configure(image=None, text="?", font=("Arial", 64))
         else:
             self.preview_letter_label.configure(text=f"Letter {letter}")
-            self.preview_instruction_label.configure(text=f"Get ready to sign the letter {letter}")
+            self.preview_instruction_label.configure(text=f"Get ready to sign {letter}")
 
-            img_key = f"{letter_data.get('image')}_large"
-            if img_key in self.image_cache and self.image_cache[img_key]:
+            img_name = letter_data.get("image")
+            img_key = f"{img_name}_large" if img_name else None
+            if img_key and img_key in self.image_cache:
                 self.preview_image_label.configure(image=self.image_cache[img_key], text="")
             else:
                 self.preview_image_label.configure(image=None, text=letter, font=self.title_font)
@@ -251,12 +263,14 @@ class LearningScreen(BaseScreen):
             self.state = "detecting"
             self.match_streak = 0
             self.hold_progress.set(0.0)
+            self.frame_buffer.clear()
+            self.raw_landmarks_buffer.clear()
 
             self._hide_all_frames()
             self.camera_frame.pack(expand=True, fill="both")
 
             letter_data = self.letters[self.current_index]
-            letter = letter_data["letter"]
+            letter = str(letter_data["letter"])
 
             # QUIZ MODE ADJUSTMENTS
             if self.is_quiz_mode:
@@ -280,19 +294,38 @@ class LearningScreen(BaseScreen):
 
         frame = self.camera.get_frame()
         if frame is not None:
-            results = self.detector.detect(frame)
-            self.detector.draw(frame, results)
+            card_data = self.letters[self.current_index]
+            target_letter = str(card_data["letter"])
+            is_dynamic = card_data.get("is_dynamic", target_letter in ["J", "Z", "10"])
 
-            fingers = self.detector.get_raised_fingers(frame, results)
-            target_fingers = self.letters[self.current_index].get("target", [])
-            is_match = (fingers and fingers == target_fingers)
+            if is_dynamic:
+                # Dynamic Model Pipeline (J, Z, 10)
+                prediction_text = self.detector.process_dynamic_frame(
+                    frame, 
+                    self.frame_buffer, 
+                    self.raw_landmarks_buffer
+                )
+            else:
+                # Static Model Pipeline (A-I, K-Y, 0-9)
+                prediction_text = self.detector.process_frame(
+                    frame)
+
+            # Strict Verification: Prevent None/Empty string false matches
+            is_match = (
+                prediction_text is not None 
+                and prediction_text != "" 
+                and str(prediction_text).strip().upper() == target_letter.strip().upper()
+            )
 
             if is_match:
                 self.match_streak += 1
-                self.sign_label.configure(text="Match! Hold it...", text_color="#4CAF50")
+                self.sign_label.configure(text=f"Detected {target_letter}! Hold it...", text_color="#4CAF50")
             else:
                 self.match_streak = 0
-                self.sign_label.configure(text="Keep trying...", text_color=config.SUBTEXT_COLOR)
+                self.sign_label.configure(
+                    text=f"Not quite {target_letter}..." if prediction_text else "Show your hand to the camera...", 
+                    text_color=config.SUBTEXT_COLOR
+                )
 
             progress_ratio = min(1.0, self.match_streak / config.SIGN_CONFIRM_FRAMES)
             self.hold_progress.set(progress_ratio)
@@ -308,7 +341,7 @@ class LearningScreen(BaseScreen):
 
         self.loop_id = self.after(15, self._update_frame)
 
-    # --- Success, Skip, and Retry Actions ---
+    #Success, Skip, and Retry Actions
 
     def _on_correct_sign(self):
         """Triggered upon successful gesture hold."""
@@ -322,7 +355,9 @@ class LearningScreen(BaseScreen):
         self.cards_learnt += 1
         self._update_progress_ui()
 
-        # FUTURE: self.progress_manager.mark_as_learnt(letter)
+        if self.progress_manager:
+            current_letter = self.letters[self.current_index]["letter"]
+            self.progress_manager.mark_as_learnt(current_letter)
 
         self._show_card_success_screen()
 
@@ -342,13 +377,14 @@ class LearningScreen(BaseScreen):
 
     def _retry_current_card(self):
         """Resets status from 'learnt' back to 'learning' and restarts detection."""
-        if self.cards_learnt > 0:
+        if self.cards_learnt > 0 and self.state == "card_success":
             self.cards_learnt -= 1
             self._update_progress_ui()
 
-        # FUTURE: self.progress_manager.mark_as_learning(letter)
+        if self.progress_manager:
+            current_letter = self.letters[self.current_index]["letter"]
+            self.progress_manager.mark_as_learning(current_letter)
 
-        # Reset streak and jump straight back into detection mode
         self._start_detecting()
 
     def _skip_card(self):
@@ -386,7 +422,7 @@ class LearningScreen(BaseScreen):
             text=f"You learnt {self.cards_learnt} out of {self.total_cards} signs.")
         self.ready_btn.configure(text="Back to Lessons", command=self._clean_and_go_back)
 
-    # --- Cleanup ---
+    # Cleanup
 
     def _clean_and_go_back(self):
         if self.loop_id:
